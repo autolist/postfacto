@@ -59,6 +59,25 @@ describe '/retros/:retro_id/action_items' do
       expect(retro.action_items.count).to eq(0)
       expect(status).to eq(204)
     end
+
+    it 'provides the action items as json' do
+      retro.action_items.create!(description: 'This is the first action item')
+      retro.action_items.create!(description: 'This is the second action item', done: true)
+
+      get retro_path(retro) + '/action_items', headers: { HTTP_AUTHORIZATION: token }, as: :json
+
+      data = JSON.parse(response.body)
+
+      expect(data['action_items'].count).to eq(2)
+
+      expect(data['action_items'][0]['id']).to be_kind_of(Integer)
+      expect(data['action_items'][0]['description']).to eq('This is the first action item')
+      expect(data['action_items'][0]['done']).to eq(false)
+
+      expect(data['action_items'][1]['id']).to be_kind_of(Integer)
+      expect(data['action_items'][1]['description']).to eq('This is the second action item')
+      expect(data['action_items'][1]['done']).to eq(true)
+    end
   end
 
   describe 'when password is not provided' do
@@ -81,6 +100,13 @@ describe '/retros/:retro_id/action_items' do
         end.to_not change { ActionItem.count }
         expect(response.status).to eq(403)
       end
+
+      it 'returns 403 when trying to view all action items and not logged in' do
+        retro.action_items.create!(description: 'This is a description')
+        get retro_path(retro) + '/action_items', as: :json
+
+        expect(response.status).to eq(403)
+      end
     end
 
     context 'when the retro is public' do
@@ -101,6 +127,13 @@ describe '/retros/:retro_id/action_items' do
           delete retro_action_item_path(retro, action_item), as: :json
         end.to change { ActionItem.count }.by(-1)
         expect(response.status).to eq(204)
+      end
+
+      it 'returns 200 when trying to view all action items and not logged in' do
+        retro.action_items.create!(description: 'This is a description')
+        get retro_path(retro) + '/action_items', as: :json
+
+        expect(response.status).to eq(200)
       end
     end
   end

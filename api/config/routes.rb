@@ -45,7 +45,7 @@ Rails.application.routes.draw do
   resources :retros, only: [:create, :index, :show, :update] do
     resources :archives, only: [:index, :show]
     resources :settings, only: [:index]
-    resources :action_items, only: [:create, :destroy, :update]
+    resources :action_items, only: [:create, :destroy, :update, :index]
     resources :items, only: [:create, :update, :destroy] do
       patch 'done', to: :done, controller: 'items'
       post 'vote', to: :vote, controller: 'items'

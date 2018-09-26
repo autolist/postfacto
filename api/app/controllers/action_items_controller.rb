@@ -51,6 +51,12 @@ class ActionItemsController < ApplicationController
     render 'show'
   end
 
+  def index
+    @action_items = @retro.action_items
+
+    render 'index'
+  end
+
   private
 
   def action_params
